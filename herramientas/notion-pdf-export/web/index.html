@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PR2026 PDF Export</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="cover" aria-label="Cabecera PR2026">
+        <div class="cover-strip cover-strip-blue"></div>
+        <div class="cover-strip cover-strip-red"></div>
+        <div class="cover-strip cover-strip-yellow"></div>
+      </section>
+
+      <header class="page-header">
+        <div class="brand-mark" aria-hidden="true">PR</div>
+        <p class="eyebrow">Exportador local</p>
+        <h1>PR2026: Performance Review</h1>
+        <p class="lead">
+          Sube el export HTML de Notion, revisa las páginas detectadas y elige qué secciones entran en el PDF final.
+        </p>
+      </header>
+
+      <section class="workflow" aria-label="Flujo de exportación">
+        <article class="panel upload-panel">
+          <div class="panel-header">
+            <span class="step">1</span>
+            <div>
+              <h2>Subida</h2>
+              <p>Carpeta completa, ZIP o varios HTML del export de Notion.</p>
+            </div>
+          </div>
+
+          <div id="dropZone" class="drop-zone">
+            <strong>Arrastra archivos aquí</strong>
+            <span>Para conservar imágenes y subpáginas, usa preferentemente la carpeta exportada o el ZIP.</span>
+          </div>
+
+          <div class="actions">
+            <label class="button primary">
+              <input id="folderInput" type="file" webkitdirectory multiple />
+              Subir carpeta exportada
+            </label>
+            <label class="button secondary">
+              <input id="fileInput" type="file" accept=".html,.zip" multiple />
+              Subir HTML o ZIP
+            </label>
+          </div>
+
+          <div class="path-loader">
+            <label class="field">
+              <span>Ruta local del export</span>
+              <input
+                id="pathInput"
+                type="text"
+                value="/Users/yamilmeliansantos/Downloads/Privado y compartido"
+                spellcheck="false"
+              />
+            </label>
+            <button id="scanPathButton" class="button secondary" type="button">Detectar desde ruta</button>
+          </div>
+        </article>
+
+        <article class="panel pages-panel">
+          <div class="panel-header">
+            <span class="step">2</span>
+            <div>
+              <h2>Páginas detectadas</h2>
+              <p id="pageSummary">Todavía no hay páginas cargadas.</p>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <button id="selectAll" class="icon-button" type="button" title="Seleccionar todo">Todo</button>
+            <button id="selectNone" class="icon-button" type="button" title="Quitar selección">Ninguna</button>
+          </div>
+
+          <div id="pagesList" class="pages-list empty-state">
+            Sube un export para ver la página principal y sus subpáginas.
+          </div>
+        </article>
+      </section>
+
+      <section class="panel export-panel">
+        <div class="panel-header">
+          <span class="step">3</span>
+          <div>
+            <h2>Generación PDF</h2>
+            <p>Se creará un PDF compilado y PDFs individuales de las páginas seleccionadas.</p>
+          </div>
+        </div>
+
+        <div class="export-row">
+          <label class="field">
+            <span>Título del PDF</span>
+            <input id="pdfTitle" type="text" value="PR2026 - exportación seleccionada" />
+          </label>
+          <button id="generateButton" class="button primary generate-button" type="button" disabled>Generar PDF</button>
+        </div>
+
+        <div id="status" class="status" role="status">Esperando subida.</div>
+        <div id="result" class="result" hidden></div>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
