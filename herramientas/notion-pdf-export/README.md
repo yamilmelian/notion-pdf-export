@@ -58,21 +58,18 @@ Despues comparte la URL con la IP local del Mac que ejecuta la app, por ejemplo:
 http://192.168.0.138:4173
 ```
 
-Cuando la app escucha fuera de `localhost`, la deteccion por ruta local queda desactivada por seguridad. En ese modo la persona usuaria debe subir el `.zip`, la carpeta exportada o los `.html` desde la interfaz.
-
 La interfaz permite:
 
 - subir una carpeta exportada desde Notion;
 - subir un `.zip`;
 - subir uno o varios `.html`;
-- detectar directamente una ruta local del Mac, por ejemplo `/Users/yamilmeliansantos/Downloads/Privado y compartido`;
 - ver las paginas detectadas;
 - seleccionar que paginas entran en el PDF;
-- descargar el PDF compilado y los PDFs individuales.
+- descargar el PDF compilado y los PDFs individuales desde el navegador.
 
 Para conservar imagenes y subpaginas, lo mas fiable es subir la carpeta completa exportada desde Notion o el `.zip` original.
 
-Si ya tienes el HTML descomprimido en `Downloads`, usa `Detectar desde ruta`. Subir solo el HTML principal no permite al navegador leer automaticamente las subpaginas hermanas.
+Subir solo el HTML principal no permite al navegador leer automaticamente las subpaginas hermanas. Para ese caso, sube el `.zip` original de Notion o la carpeta completa exportada.
 
 El PDF compilado no añade portada, indice ni cabeceras propias: usa la plantilla de Notion y las subpaginas seleccionadas, manteniendo el CSS original de Notion y anadiendo solo saltos de pagina entre secciones.
 
@@ -124,8 +121,9 @@ Configuracion recomendada:
 
 Notas operativas:
 
-- En despliegue remoto la deteccion por ruta local se desactiva automaticamente. Las personas usuarias deben subir el `.zip`, carpeta exportada o HTML desde la interfaz.
-- Los PDFs generados se guardan dentro del contenedor. Si se necesita conservar historico tras redeploys, anadir un volumen persistente para `salida-notion-pdf/web`.
+- Las personas usuarias suben el `.zip`, carpeta exportada o HTML desde la interfaz. La app no muestra ni acepta rutas locales del servidor.
+- Los PDFs generados se entregan como descargas del navegador. La carpeta final la decide cada usuario en su navegador o sistema operativo.
+- Los PDFs generados se guardan temporalmente dentro del contenedor para poder servir la descarga. Si se necesita conservar historico tras redeploys, anadir un volumen persistente para `salida-notion-pdf/web`.
 - La app no tiene autenticacion propia. Si se publica fuera de una red privada, protegerla desde Coolify/Traefik, VPN, autenticacion externa o una regla de acceso equivalente.
 
 ## Limitaciones conocidas

@@ -15,9 +15,6 @@ const generateButton = document.querySelector("#generateButton");
 const statusBox = document.querySelector("#status");
 const resultBox = document.querySelector("#result");
 const pdfTitle = document.querySelector("#pdfTitle");
-const pathInput = document.querySelector("#pathInput");
-const scanPathButton = document.querySelector("#scanPathButton");
-const pathLoader = document.querySelector(".path-loader");
 
 function setStatus(message, tone = "") {
   statusBox.className = `status ${tone ? `is-${tone}` : ""}`;
@@ -110,34 +107,10 @@ async function uploadFiles(files) {
   state.selected = new Set(payload.pages.map((page) => page.relativePath));
   renderPages();
   if (payload.pages.length === 1 && payload.pages[0].linkCount > 0) {
-    setStatus("Solo se ha cargado el HTML principal. Para seleccionar subpáginas, sube la carpeta completa o usa la ruta local del export.", "error");
+    setStatus("Solo se ha cargado el HTML principal. Para seleccionar subpáginas, sube la carpeta completa exportada desde Notion o el ZIP original.", "error");
     return;
   }
   setStatus(`Subida lista: ${payload.fileCount} archivo(s), ${payload.pages.length} página(s) HTML detectadas.`, "ok");
-}
-
-async function scanLocalPath() {
-  const localPath = pathInput.value.trim();
-  if (!localPath) return;
-
-  setStatus("Leyendo la ruta local del export...", "busy");
-  resultBox.hidden = true;
-
-  const response = await fetch("/api/scan-path", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ path: localPath }),
-  });
-  const payload = await response.json();
-  if (!response.ok || payload.error) {
-    throw new Error(payload.error || "No se pudo leer la ruta indicada.");
-  }
-
-  state.uploadId = payload.uploadId;
-  state.pages = payload.pages;
-  state.selected = new Set(payload.pages.map((page) => page.relativePath));
-  renderPages();
-  setStatus(`Ruta cargada: ${payload.pages.length} página(s) HTML detectadas. Marca solo la plantilla y las subpáginas que quieras.`, "ok");
 }
 
 async function generatePdf() {
@@ -177,6 +150,7 @@ function renderResult(payload) {
 
   const compiled = document.createElement("a");
   compiled.href = payload.downloads.compiled;
+  compiled.download = "PR2026_compilado.pdf";
   compiled.textContent = "Descargar PDF compilado";
 
   const list = document.createElement("ul");
@@ -184,24 +158,13 @@ function renderResult(payload) {
     const item = document.createElement("li");
     const link = document.createElement("a");
     link.href = url;
+    link.download = "";
     link.textContent = `PDF individual ${index + 1}`;
     item.append(link);
     list.append(item);
   });
 
   resultBox.append(title, compiled, list);
-}
-
-async function loadConfig() {
-  try {
-    const response = await fetch("/api/config");
-    const config = await response.json();
-    if (!config.allowScanPath && pathLoader) {
-      pathLoader.hidden = true;
-    }
-  } catch {
-    if (pathLoader) pathLoader.hidden = true;
-  }
 }
 
 folderInput.addEventListener("change", async () => {
@@ -255,24 +218,6 @@ selectNone.addEventListener("click", () => {
   renderPages();
 });
 
-scanPathButton.addEventListener("click", async () => {
-  try {
-    await scanLocalPath();
-  } catch (error) {
-    setStatus(error.message, "error");
-  }
-});
-
-pathInput.addEventListener("keydown", async (event) => {
-  if (event.key !== "Enter") return;
-  event.preventDefault();
-  try {
-    await scanLocalPath();
-  } catch (error) {
-    setStatus(error.message, "error");
-  }
-});
-
 generateButton.addEventListener("click", async () => {
   try {
     await generatePdf();
@@ -282,5 +227,4 @@ generateButton.addEventListener("click", async () => {
   }
 });
 
-await loadConfig();
 renderPages();

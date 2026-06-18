@@ -182,14 +182,6 @@ h2 {
   margin-top: 14px;
 }
 
-.path-loader {
-  border-top: 1px solid var(--line);
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-  padding-top: 16px;
-}
-
 .button,
 .icon-button {
   align-items: center;

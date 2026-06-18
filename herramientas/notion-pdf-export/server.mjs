@@ -51,13 +51,6 @@ function safeJoin(baseDir, relativePath) {
   return resolved;
 }
 
-function expandHome(value) {
-  if (!value) return value;
-  if (value === "~") return process.env.HOME;
-  if (value.startsWith("~/")) return path.join(process.env.HOME, value.slice(2));
-  return value;
-}
-
 function createSessionFromInput(inputPath, sourceDir = null) {
   const scanRoot = prepareInput(inputPath);
   const htmlFiles = walkHtmlFiles(scanRoot);
@@ -146,28 +139,6 @@ async function handleUpload(req, res) {
   });
 }
 
-async function handleScanPath(req, res) {
-  if (!allowScanPath) {
-    jsonResponse(res, 403, {
-      error: "La detección por ruta local está desactivada cuando la app escucha fuera de localhost.",
-    });
-    return;
-  }
-
-  const body = JSON.parse((await readRequestBody(req)).toString("utf8") || "{}");
-  if (!body.path || typeof body.path !== "string") {
-    throw new Error("Indica una ruta local de exportación.");
-  }
-
-  const inputPath = path.resolve(expandHome(body.path.trim()));
-  const session = createSessionFromInput(inputPath);
-  jsonResponse(res, 200, {
-    uploadId: session.id,
-    pages: session.pages,
-    sourcePath: inputPath,
-  });
-}
-
 async function handleGenerate(req, res) {
   const body = JSON.parse((await readRequestBody(req)).toString("utf8") || "{}");
   const session = sessions.get(body.uploadId);
@@ -198,7 +169,6 @@ async function handleGenerate(req, res) {
 
   jsonResponse(res, 200, {
     pages: result.pages,
-    outputPath: out,
     downloads,
   });
 }
@@ -236,6 +206,7 @@ function serveDownload(req, res, pathname) {
   res.writeHead(200, {
     "content-type": "application/pdf",
     "content-disposition": `attachment; filename="${path.basename(filePath).replace(/"/g, "")}"`,
+    "cache-control": "no-store",
   });
   res.end(readFileSync(filePath));
 }
@@ -244,9 +215,8 @@ const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, "http://localhost");
     if (req.method === "GET" && url.pathname === "/api/health") return jsonResponse(res, 200, { ok: true });
-    if (req.method === "GET" && url.pathname === "/api/config") return jsonResponse(res, 200, { allowScanPath });
+    if (req.method === "GET" && url.pathname === "/api/config") return jsonResponse(res, 200, {});
     if (req.method === "POST" && url.pathname === "/api/upload") return await handleUpload(req, res);
-    if (req.method === "POST" && url.pathname === "/api/scan-path") return await handleScanPath(req, res);
     if (req.method === "POST" && url.pathname === "/api/generate") return await handleGenerate(req, res);
     if (req.method === "GET" && url.pathname.startsWith("/download/")) return serveDownload(req, res, url.pathname);
     if (req.method === "GET") return serveStatic(req, res, url.pathname);
@@ -258,11 +228,7 @@ const server = createServer(async (req, res) => {
 
 const port = Number(process.env.PORT || 4173);
 const host = process.env.HOST || "127.0.0.1";
-const allowScanPath = process.env.ALLOW_SCAN_PATH === "1" || host === "127.0.0.1" || host === "localhost";
 
 server.listen(port, host, () => {
   console.log(`Notion PDF Export disponible en http://${host}:${port}`);
-  if (!allowScanPath) {
-    console.log("Detección por ruta local desactivada para acceso en red.");
-  }
 });
