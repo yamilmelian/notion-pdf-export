@@ -17,6 +17,7 @@ const resultBox = document.querySelector("#result");
 const pdfTitle = document.querySelector("#pdfTitle");
 const pathInput = document.querySelector("#pathInput");
 const scanPathButton = document.querySelector("#scanPathButton");
+const pathLoader = document.querySelector(".path-loader");
 
 function setStatus(message, tone = "") {
   statusBox.className = `status ${tone ? `is-${tone}` : ""}`;
@@ -178,9 +179,6 @@ function renderResult(payload) {
   compiled.href = payload.downloads.compiled;
   compiled.textContent = "Descargar PDF compilado";
 
-  const output = document.createElement("p");
-  output.textContent = `Salida local: ${payload.outputPath}`;
-
   const list = document.createElement("ul");
   payload.downloads.individual.forEach((url, index) => {
     const item = document.createElement("li");
@@ -191,7 +189,19 @@ function renderResult(payload) {
     list.append(item);
   });
 
-  resultBox.append(title, compiled, output, list);
+  resultBox.append(title, compiled, list);
+}
+
+async function loadConfig() {
+  try {
+    const response = await fetch("/api/config");
+    const config = await response.json();
+    if (!config.allowScanPath && pathLoader) {
+      pathLoader.hidden = true;
+    }
+  } catch {
+    if (pathLoader) pathLoader.hidden = true;
+  }
 }
 
 folderInput.addEventListener("change", async () => {
@@ -272,4 +282,5 @@ generateButton.addEventListener("click", async () => {
   }
 });
 
+await loadConfig();
 renderPages();

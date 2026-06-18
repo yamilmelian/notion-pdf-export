@@ -107,6 +107,27 @@ Requiere Google Chrome instalado en macOS. Si Chrome no esta en la ruta habitual
 CHROME_PATH="/ruta/a/Chrome" node herramientas/notion-pdf-export/notion-html-to-pdf.mjs ~/Downloads/PR2026.zip --out ~/Desktop/PR2026_PDF
 ```
 
+## Despliegue en Coolify
+
+El repositorio incluye `Dockerfile` para desplegarlo como aplicacion Docker en Coolify.
+
+Configuracion recomendada:
+
+- Build Pack: `Dockerfile`
+- Puerto interno: `4173`
+- Healthcheck path: `/api/health`
+- Variables:
+  - `HOST=0.0.0.0`
+  - `PORT=4173`
+  - `CHROME_PATH=/usr/bin/chromium`
+  - `NOTION_PDF_TIMEOUT_MS=60000` si los exports son grandes
+
+Notas operativas:
+
+- En despliegue remoto la deteccion por ruta local se desactiva automaticamente. Las personas usuarias deben subir el `.zip`, carpeta exportada o HTML desde la interfaz.
+- Los PDFs generados se guardan dentro del contenedor. Si se necesita conservar historico tras redeploys, anadir un volumen persistente para `salida-notion-pdf/web`.
+- La app no tiene autenticacion propia. Si se publica fuera de una red privada, protegerla desde Coolify/Traefik, VPN, autenticacion externa o una regla de acceso equivalente.
+
 ## Limitaciones conocidas
 
 - El PDF consolidado recompone varias paginas HTML en un unico documento; para maxima fidelidad visual, comparar con los PDFs individuales.

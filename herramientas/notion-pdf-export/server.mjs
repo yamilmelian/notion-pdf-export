@@ -243,6 +243,8 @@ function serveDownload(req, res, pathname) {
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, "http://localhost");
+    if (req.method === "GET" && url.pathname === "/api/health") return jsonResponse(res, 200, { ok: true });
+    if (req.method === "GET" && url.pathname === "/api/config") return jsonResponse(res, 200, { allowScanPath });
     if (req.method === "POST" && url.pathname === "/api/upload") return await handleUpload(req, res);
     if (req.method === "POST" && url.pathname === "/api/scan-path") return await handleScanPath(req, res);
     if (req.method === "POST" && url.pathname === "/api/generate") return await handleGenerate(req, res);
